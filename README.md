@@ -9,9 +9,9 @@ new BuildAndUpload({
   uploadPath: path.join(__dirname, 'dist/static'), //上传路径，必传
   overwrite: true, // 是否覆盖上传
   qiniu: {
-    ak: 'C17UqM_e1QYqNMSXDpTqvnnke-eNFtccjj9JbSHm',
-    sk: '8SNvuR3MJFymdI4uRUYmhjgjhQIGt-WkQZEPBcR1',
-    bucket: 'homeup',
+    ak: 'xxxxx',
+    sk: 'xxxx',
+    bucket: 'bucket',
     qiniu_name: 'db921005@163.com'
   }
 })
