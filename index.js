@@ -57,7 +57,7 @@ class BuildAndUpload {
           chalk.yellow('未检测到' + platType + '-qshell上传工具，开始下载...')
         );
         const fileName = {
-          Linux: 'qshell-v2.6.21-linux-amd64.zip',
+          Linux: 'qshell-v2.6.2-linux-amd64.zip',
           Darwin: 'qshell-v2.6.2-darwin-amd64.zip',
           Windows_NT: 'qshell-v2.6.2-windows-amd64.zip',
         };
@@ -83,7 +83,7 @@ class BuildAndUpload {
                     const dst = path.resolve(__dirname, './utils');
                     (async () => {
                       await extract(fileSrc, { dir: dst });
-                      console.log(chalk.blue('解压完成', os.arch()));
+                      console.log(chalk.blue('解压完成'));
                       console.log(chalk.green('开始上传文件...'));
                       _this.uploadDist();
                     })();
@@ -120,41 +120,33 @@ class BuildAndUpload {
     if (!__dirname) {
       const __dirname = path.resolve();
     }
-    try {
-      const commandPath = path.resolve(__dirname, 'utils');
-      const setAccount = execFileSync(
-        path.resolve(__dirname, 'utils/upload.sh'),
-        [
-          commandPath,
-          'account -- C17UqM_e1QYqNMSXDpTqvnnke-eNFtccjj9JbSHm 8SNvuR3MJFymdI4uRUYmhjgjhQIGt-WkQZEPBcR1 db921005@163.com',
-        ],
-        {
-          encoding: 'utf-8',
-        }
-      );
-      const uploadShell = execFileSync(
-        path.resolve(__dirname, 'utils/upload.sh'),
-        [commandPath, `qupload ${process.cwd()}/dist/upload.conf`],
-        {
-          encoding: 'utf-8',
-        }
-      );
-      // const uploadShell = execFileSync(
-      //   path.resolve(__dirname, 'utils/qshell'),
-      //   ['qupload', `${process.cwd()}/dist/upload.conf`]
-      // );
-      const r1 = readline.createInterface({
-        input: fs.createReadStream(uploadPath + '/upload.log'),
-      });
-      let i = 1;
-      r1.on('line', function (line) {
-        console.log(line);
-        i += 1;
-      });
-    } catch (error) {
-      console.error(error);
-      throw new Error(error);
-    }
+    const setAccount = execFileSync(
+      path.resolve(__dirname, 'utils/qshell'),
+      [
+        'account',
+        '--',
+        'C17UqM_e1QYqNMSXDpTqvnnke-eNFtccjj9JbSHm',
+        '8SNvuR3MJFymdI4uRUYmhjgjhQIGt-WkQZEPBcR1',
+        'db921005@163.com',
+      ],
+      {
+        encoding: 'utf-8',
+        timeout: 300 * 1000,
+        shell: true,
+      }
+    );
+    const uploadShell = execFileSync(path.resolve(__dirname, 'utils/qshell'), [
+      'qupload',
+      `${process.cwd()}/dist/upload.conf`,
+    ]);
+    const r1 = readline.createInterface({
+      input: fs.createReadStream(uploadPath + '/upload.log'),
+    });
+    let i = 1;
+    r1.on('line', function (line) {
+      console.log(line);
+      i += 1;
+    });
   }
 
   // robotMsg(constTime) {
