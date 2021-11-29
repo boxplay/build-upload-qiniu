@@ -101,7 +101,7 @@ class BuildAndUpload {
 
   uploadDist() {
     const filePath = path.resolve(__dirname, 'upload.conf');
-    const { key_prefix, uploadPath, buildId } = this.options;
+    const { key_prefix, uploadPath, buildId, qiniu } = this.options;
     if (!fs.existsSync(filePath)) {
       throw new Error('error');
     }
@@ -124,10 +124,7 @@ class BuildAndUpload {
       const commandPath = path.resolve(__dirname, 'utils');
       const setAccount = execFileSync(
         path.resolve(__dirname, 'utils/upload.sh'),
-        [
-          commandPath,
-          'account -- C17UqM_e1QYqNMSXDpTqvnnke-eNFtccjj9JbSHm 8SNvuR3MJFymdI4uRUYmhjgjhQIGt-WkQZEPBcR1 db921005@163.com',
-        ],
+        [commandPath, `account -- ${qiniu.ak} ${qiniu.sk} ${qiniu.bucket}`],
         {
           encoding: 'utf-8',
         }
