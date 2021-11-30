@@ -33,12 +33,15 @@ class BuildAndUpload {
       !this.options.qiniu.qiniu_name
     ) {
       throw new Error('没有正确设置七牛账号');
+      process.exit(-1);
     }
     if (!this.options.qiniu.bucket) {
       throw new Error('没有设置七牛bucket');
+      process.exit(-1);
     }
     if (!this.options.uploadPath) {
       throw new Error('uploadPath 没有设置');
+      process.exit(-1);
     }
   }
   checkQshell() {
@@ -71,6 +74,7 @@ class BuildAndUpload {
               .on('close', (err) => {
                 if (err) {
                   throw new Error('上传工具下载失败');
+                  process.exit(-1);
                 }
                 console.log(chalk.green('开始解压...'));
                 const fileSrc = path.resolve(
@@ -104,6 +108,7 @@ class BuildAndUpload {
     const { key_prefix, uploadPath, buildId, qiniu } = this.options;
     if (!fs.existsSync(filePath)) {
       throw new Error('error');
+      process.exit(-1);
     }
     const data = fs.readFileSync(filePath).toString();
     let jsonData = JSON.parse(data);
@@ -113,34 +118,39 @@ class BuildAndUpload {
     if (buildId) {
       jsonData['key_prefix'] = buildId + '/' + key_prefix;
     }
-    fs.writeFileSync(
-      path.resolve(process.cwd(), 'dist/upload.conf'),
-      JSON.stringify(jsonData, null, 2)
-    );
-    if (!__dirname) {
-      const __dirname = path.resolve();
-    }
-    const setAccount = execFileSync(
-      path.resolve(__dirname, 'utils/qshell'),
-      ['account', '--', qiniu.ak, qiniu.sk, qiniu.bucket],
-      {
-        encoding: 'utf-8',
-        timeout: 300 * 1000,
-        shell: true,
+    try {
+      fs.writeFileSync(
+        path.resolve(process.cwd(), 'dist/upload.conf'),
+        JSON.stringify(jsonData, null, 2)
+      );
+      if (!__dirname) {
+        const __dirname = path.resolve();
       }
-    );
-    const uploadShell = execFileSync(path.resolve(__dirname, 'utils/qshell'), [
-      'qupload',
-      `${process.cwd()}/dist/upload.conf`,
-    ]);
-    const r1 = readline.createInterface({
-      input: fs.createReadStream(uploadPath + '/upload.log'),
-    });
-    let i = 1;
-    r1.on('line', function (line) {
-      console.log(line);
-      i += 1;
-    });
+      const setAccount = execFileSync(
+        path.resolve(__dirname, 'utils/qshell'),
+        ['account', '--', qiniu.ak, qiniu.sk, qiniu.bucket],
+        {
+          encoding: 'utf-8',
+          timeout: 300 * 1000,
+          shell: true,
+        }
+      );
+      const uploadShell = execFileSync(
+        path.resolve(__dirname, 'utils/qshell'),
+        ['qupload', `${process.cwd()}/dist/upload.conf`]
+      );
+      const r1 = readline.createInterface({
+        input: fs.createReadStream(uploadPath + '/upload.log'),
+      });
+      let i = 1;
+      r1.on('line', function (line) {
+        console.log(line);
+        i += 1;
+      });
+    } catch (error) {
+      throw new Error(error);
+      process.exit(-1);
+    }
   }
 
   // robotMsg(constTime) {
