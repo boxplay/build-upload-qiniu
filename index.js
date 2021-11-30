@@ -33,12 +33,15 @@ class BuildAndUpload {
       !this.options.qiniu.qiniu_name
     ) {
       throw new Error('没有正确设置七牛账号');
+      process.exit(-1);
     }
     if (!this.options.qiniu.bucket) {
       throw new Error('没有设置七牛bucket');
+      process.exit(-1);
     }
     if (!this.options.uploadPath) {
       throw new Error('uploadPath 没有设置');
+      process.exit(-1);
     }
   }
   checkQshell() {
@@ -71,6 +74,7 @@ class BuildAndUpload {
               .on('close', (err) => {
                 if (err) {
                   throw new Error('上传工具下载失败');
+                  process.exit(-1);
                 }
                 console.log(chalk.green('开始解压...'));
                 const fileSrc = path.resolve(
@@ -78,6 +82,10 @@ class BuildAndUpload {
                   './utils/' + fileName[platType]
                 );
                 fs.stat(fileSrc, function (err, stats) {
+                  if (err) {
+                    throw new Error(err);
+                    process.exit(-1);
+                  }
                   if (stats.isFile()) {
                     // const qshellStream = fs.readFileSync(fileSrc);
                     const dst = path.resolve(__dirname, './utils');
@@ -151,6 +159,7 @@ class BuildAndUpload {
     } catch (error) {
       console.error(error);
       throw new Error(error);
+      process.exit(-1);
     }
   }
 
